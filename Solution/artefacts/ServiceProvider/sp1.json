@@ -1,0 +1,9 @@
+{
+"role": "ServiceProvider",
+"name": "SP1",
+"parent": "/artifact/SaaS/saas.json",
+"children": ["/artifact/Organization/org1.json",
+             "/artifact/Organization/org2.json"],
+"usecases": {
+    }
+}

@@ -1,0 +1,16 @@
+{
+    "role": "Organization",
+    "name": "Org1",
+    "parent": "/artifact/ServiceProvider/sp1.json",
+    "children": ["/artifact/Department/dept1.json",
+                 "/artifact/Department/dept2.json"],
+    "usecases": {
+       "inter-vn": [
+           {"name": "vrf1", "vns": ["vn1", "vn2"]},
+           {"name": "vrf2", "vns": ["vn3", "vn4"]},
+       ],
+    }
+    "traffic": {
+        "vns": ["vn1", "vn2", "vn3", "vn4"]
+    }
+}

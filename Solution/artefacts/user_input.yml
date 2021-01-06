@@ -1,0 +1,39 @@
+saas_username: u1
+saas_password: p1
+ServiceProviders:
+  ATOS:
+    username: NetworkAdmin1
+    password: MyPassword
+    Organizations:
+      Coke:
+        username: CokeAdmin1
+        password: MyPassword
+        Departments:
+          CokeHR:
+            username: CokeHR1
+            password: MyPassword
+          CokeSales:
+            username: CokeSales1
+            password: MyPassword
+        Servers:
+          - "BMS1"
+          - "BMS2"
+      Pepsi:
+        username:
+        password:
+        Departments:
+          PepsiHR:
+            username:
+            password:
+        Servers:
+          - "BMS3"
+    fabrics:
+      - "/path/to/fabric1.yml"
+      - "/path/to/fabric2.yml"
+  TCS:
+    Organizations:
+      Org1:
+        Departments:
+          Dept1:
+    fabric:
+        - "/path/to/fabric3.yml"

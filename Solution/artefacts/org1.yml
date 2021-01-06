@@ -1,0 +1,34 @@
+role: Organization
+name: Org1
+parent: "/artifacts/ServiceProvider/sp1.yml"
+children:
+    - "/artifacts/Department/dept1.yml"
+    - "/artifacts/Department/dept2.yml"
+features:
+    IntraVN:
+        "abcd-efgh-ijkl":
+            name: vrf1
+            networks:
+                - vn1
+                - vn2
+            flows:
+                - "1234-5678-9012"
+    Firewall:
+        "bcde-fghi-jklm":
+            name: filter1
+flows:
+    "1234-5678-9012":
+        src_node: bms1
+        dst_node: bms2
+        src_ip: 1.1.1.1
+        dst_ip: 2.2.2.2
+        src_port: 30000
+        dst_port: 80
+        protocol: TCP
+        src_pid: 1111
+        dst_pid: 2222
+networks:
+    - "vn1"
+    - "vn2"
+    - "vn3"
+    - "vn4"
