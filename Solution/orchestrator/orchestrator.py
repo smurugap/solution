@@ -1,8 +1,19 @@
 import yaml
 import gevent
 import random
+import os
+import uuid
+from gevent import subprocess
+
+ARTIFACT_DIR = os.getenv('ARTIFACT', '/var/tmp/')
+TESTDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+''' Will be modified to take the below from User Input rather than hardcoded '''
 ROLES = ['SaaS', 'ServiceProvider', 'Organization', 'Department']
-EVENTS = ['onboard', 'update', 'delete', 'destroy']
+EVENTS = ['onboard', 'execute', 'teardown']
+PRODUCT = os.getenv('PRODUCT', 'CEM')
+#EVENTS = ['onboard', 'update', 'delete', 'teardown']
+
 
 class Node(object):
     def __init__(self, name, role, parent=None):
@@ -35,11 +46,13 @@ class Node(object):
 class Orchestrator(object):
     def __init__(self, input_file, role='SaaS', event='onboard'):
         parsed = self.parse(input_file)
+        self.input_file = input_file
         self.role = role
         self.event = event
         self.SaaS = Node('SaaS', 'SaaS')
         self.initialize(parsed)
         self.set_tree_event()
+        self.exec_id = str(uuid.uuid4())
 
     def parse(self, input_file):
         with open(input_file, 'r') as fd:
@@ -58,14 +71,14 @@ class Orchestrator(object):
         except IndexError:
             return
         plural = role + 's'
-        for name, details in user_input[plural].items():
+        for name, details in user_input.get(plural, {}).items():
             node = Node(name, role, parent=parent)
             parent.add_child(node)
             getattr(self, role)[name] = node
             self.initchildren(node, details)
 
     def set_tree_event(self):
-        if self.event == EVENTS[0] and self.role == ROLES[0]:
+        if self.event == EVENTS[0] and self.role == 'SaaS':
             return
         self.SaaS.sink_callback(self.set_node_event)
 
@@ -80,11 +93,21 @@ class Orchestrator(object):
                 node.event = EVENTS[EVENTS.index(self.event) - 1]
 
     def execute(self, node):
-        if node.role == 'Department' and node.event == 'onboard':
+        if node.role == 'Department' and node.event == EVENTS[0]:
             return
-        sleep = random.randint(1, 20)
-        print('executing', node.name, node.role, node.event, 'sleep', sleep)
-        import time; time.sleep(sleep)
+        artifact = os.path.join(ARTIFACT_DIR, node.name+'_artifact.yaml')
+        report = os.path.join(ARTIFACT_DIR, node.name+'-'+node.event+'.xml')
+        print('Executing', node.name, node.role, node.event, 'report', report)
+        cmd = "pytest -m %s --artifact=%s --user_input=%s --exec_id=%s"\
+                " --junitxml=%s --product=%s %s"%(node.event, artifact,
+                        self.input_file, self.exec_id, report,
+                        PRODUCT, os.path.join(PRODUCT, node.role))
+        cmd = "cd %s; %s"%(TESTDIR, cmd)
+        try:
+            output = subprocess.check_output(cmd, shell=True)
+        except subprocess.CalledProcessError:
+            pass
+        import time; gevent.sleep(random.randint(0, 3))
 
     def schedule(self):
         if self.role == 'SaaS':
@@ -101,7 +124,7 @@ class Orchestrator(object):
         while True:
             for node in nodes:
                 if node.event != event or node.running == True:
-                    print('waiting on node %s: state %s running %s - exp %s'%(
+                    print('Waiting on node %s: state %s running %s - exp %s'%(
                         node.name, node.event, node.running, event))
                     gevent.sleep(5)
                     break
@@ -112,7 +135,7 @@ class Orchestrator(object):
         return ROLES[ROLES.index(role) + 1]
 
     def get_prev_role(self, role):
-        if role == ROLES[0]:
+        if role == 'SaaS':
             return ROLES[-1]
         return ROLES[ROLES.index(role) - 1]
 
@@ -130,24 +153,24 @@ class Orchestrator(object):
         return EVENTS[index - 1]
 
     def get_prev_nodes_event(self, node):
-        if node.event == 'onboard':
+        if node.event == EVENTS[0]:
             if node.role == 'SaaS':
                 return list(), None
-            return [node.parent], 'onboard'
-        elif node.role == 'Department':
-            if node.event == 'update':
+            return [node.parent], EVENTS[0]
+        elif node.role == ROLES[-1]:
+            if node.event == ROLES[-2]:
                 return list(), None
             return [self.SaaS], self.get_prev_event(node.event)
         else:
             return node.children, node.event
 
     def get_next_nodes_event(self, node):
-        if node.event == 'onboard':
-            if node.role == 'Department':
+        if node.event == EVENTS[0]:
+            if node.role == ROLES[-1]:
                 return [node], self.get_next_event(node.event)
-            return node.children, 'onboard'
+            return node.children, EVENTS[0]
         elif node.role == 'SaaS':
-            if node.event == 'destroy':
+            if node.event == EVENTS[-1]:
                 return list(), None
             return self.Department.values(), self.get_next_event(node.event)
         else:
@@ -168,6 +191,5 @@ class Orchestrator(object):
             greenlets.append(gevent.spawn(self._schedule, next_node))
         gevent.joinall(greenlets)
 
-orchestrator = Orchestrator('/tmp/user_input.yaml', 'SaaS', 'onboard')
-#orchestrator.SaaS.dump()
+orchestrator = Orchestrator('/Solution/inputs/user_input.yaml', 'Department', 'teardown', 'SaaS', 'teardown')
 orchestrator.schedule()

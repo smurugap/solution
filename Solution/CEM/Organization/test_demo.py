@@ -1,17 +1,17 @@
 import pytest
-from Solution.CEM.usecases.vEPC_usecase import Demo2
+from Solution.CEM.usecases.demo_usecase import Demo
 from Solution.lib.usecases import Usecases
 from Solution.lib.session import PyTestSession
 from Solution.lib.input import UserInput
 
-class TestvEPC(object):
+class TestDemo(object):
     @classmethod
     def setup_class(cls):
         cls.user = PyTestSession().name
-        cls.usecase_args = UserInput().get_usecases(cls.user).get(Demo2.__usecase__)
+        cls.usecase_args = UserInput().get_usecases(cls.user).get(Demo.__usecase__)
         if not cls.usecase_args:
-            pytest.skip("Feature %s not enabled"%Demo2.__usecase__)
-        cls.instances = Usecases().list(cls.user, Demo2.__usecase__)
+            pytest.skip("Feature Demo not enabled")
+        cls.instances = Usecases().list(cls.user, Demo.__usecase__)
 
     @pytest.mark.execute
     def test_create_endpoints(self):

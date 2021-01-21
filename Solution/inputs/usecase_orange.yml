@@ -1,0 +1,11 @@
+demo:
+    count: 2
+
+vEPC:
+    count: 4
+    recreate_instances: 2
+#    distribution:
+#        Mars:
+#           3
+#        Alcoa:
+#           1

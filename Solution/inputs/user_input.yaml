@@ -1,0 +1,57 @@
+saas_username: u1
+saas_password: p1
+ServiceProviders:
+  Orange:
+    username: NetworkAdmin1
+    password: MyPassword
+    usecases: /Solution/inputs/usecase_orange.yml # usecases file for the user
+    Organizations:
+      MarsDallas:
+        usecases: /Solution/inputs/usecase_mars.yml
+        username: Admin1
+        password: MyPassword
+        project: default
+        Departments:
+          MarsHR:
+            username: HR1
+            password: MyPassword
+            project: default
+          MarsSales:
+            username: Sales1
+            password: MyPassword
+      ALCOA:
+        usecases: /Solution/inputs/usecase_alcoa.yml
+        username: username
+        password: pass
+        Departments:
+          AlcoaHR:
+            username: HR1
+            password: MyPassword
+          AlcoaSales:
+            username: Sales1
+            password: MyPassword
+  ATOS:
+    usecases: /Solution/inputs/usecase_sp_atos.yml
+    username: NetworkAdmin1
+    password: MyPassword
+    project: admin # optionally specify the project
+    Organizations:
+      Coke:
+        usecases: /Solution/inputs/usecase_org_coke.yml
+        username: CokeAdmin1
+        password: MyPassword
+        Departments:
+          CokeHR:
+            username: CokeHR1
+            password: MyPassword
+          CokeSales:
+            username: CokeSales1
+            password: MyPassword
+      Pepsi:
+        usecases: /Solution/inputs/usecase_org_pepsi.yml
+        username: username
+        password: pass
+        Departments:
+          PepsiHR:
+            username: usernmae
+            password: pass
